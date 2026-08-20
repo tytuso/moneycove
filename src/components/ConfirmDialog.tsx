@@ -1,0 +1,5 @@
+import { AlertTriangle, X } from 'lucide-react'
+export function ConfirmDialog({ open, title, message, confirmLabel = 'Delete', onCancel, onConfirm }: { open: boolean; title: string; message: string; confirmLabel?: string; onCancel: () => void; onConfirm: () => void }) {
+  if (!open) return null
+  return <div className="modal-backdrop"><div className="dialog-card max-w-md"><div className="flex items-start justify-between"><div className="grid size-11 place-items-center rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-500/10"><AlertTriangle size={20}/></div><button className="icon-btn" onClick={onCancel}><X size={18}/></button></div><h3 className="mt-5 text-xl font-black text-slate-900 dark:text-white">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{message}</p><div className="mt-6 flex justify-end gap-2"><button className="secondary-btn" onClick={onCancel}>Cancel</button><button className="danger-btn" onClick={onConfirm}>{confirmLabel}</button></div></div></div>
+}

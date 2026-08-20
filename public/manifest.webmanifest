@@ -1,0 +1,15 @@
+{
+  "name": "MoneyCove — Expense Tracker & Budget Planner",
+  "short_name": "MoneyCove",
+  "description": "Track income, expenses and budgets, sync across devices and unlock AI-powered spending guidance with MoneyCove Pro.",
+  "start_url": "/app#/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    { "src": "/icons/moneycove-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/moneycove-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/moneycove-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
