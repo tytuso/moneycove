@@ -119,7 +119,7 @@ export default function App() {
     <MobileNav page={page} setPage={setPage} onAdd={openAdd} onMore={()=>setMobileMoreOpen(true)}/>
     <MoreSheet open={mobileMoreOpen} onClose={()=>setMobileMoreOpen(false)} setPage={setPage} userName={userName} userEmail={userEmail} isPro={isPro} isFounder={isFounder} onLogout={()=>void logout()}/>
     <TransactionModal open={modalOpen} currency={state.settings.currency} transaction={editing} initialDate={newTransactionDate} onClose={()=>{setModalOpen(false);setEditing(null);setNewTransactionDate(null)}} onSave={saveTransaction}/>
-    <ConfirmDialog open={Boolean(confirm)} title={confirm?.kind==='reset'?'Reset all finance data?':'Delete this transaction?'} message={confirm?.kind==='reset'?'This clears all transactions, your monthly budget and category budgets from this MoneyCove account. This action cannot be undone.':'This action cannot be undone.'} confirmLabel={confirm?.kind==='reset'?'Reset data':'Delete'} onCancel={()=>setConfirm(null)} onConfirm={confirmAction}/>
+    <ConfirmDialog open={Boolean(confirm)} requirePhrase={confirm?.kind==='reset'?'RESET':undefined} title={confirm?.kind==='reset'?'Reset all finance data?':'Delete this transaction?'} message={confirm?.kind==='reset'?'This clears all transactions, your monthly budget and category budgets from this MoneyCove account. This action cannot be undone.':'This action cannot be undone.'} confirmLabel={confirm?.kind==='reset'?'Reset data':'Delete'} onCancel={()=>setConfirm(null)} onConfirm={confirmAction}/>
     <Toast message={toast}/>
   </div>
 }

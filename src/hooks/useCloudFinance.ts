@@ -11,6 +11,11 @@ const initialState: AppState = {
 
 export type SyncStatus = 'loading' | 'synced' | 'saving' | 'offline' | 'error'
 
+function hasMeaningfulFinance(state: AppState | null | undefined) {
+  if (!state) return false
+  return state.transactions.length > 0 || state.monthlyBudget > 0 || state.categoryBudgets.length > 0
+}
+
 function normalizeState(value: unknown): AppState {
   const state = (value && typeof value === 'object' ? value : {}) as Partial<AppState>
   return {
@@ -70,15 +75,18 @@ export function useCloudFinance(userId: string | undefined) {
         return
       }
 
-      let nextState = data?.state ? normalizeState(data.state) : null
-      if (!nextState) {
-        // Same-origin migration support for anyone upgrading in place.
-        const legacyRaw = localStorage.getItem('pesapilot-data-v1.1') || localStorage.getItem('pesapilot-data-v1.2')
-        if (legacyRaw) {
-          try { nextState = normalizeState(JSON.parse(legacyRaw)) } catch { nextState = null }
-        }
+      const cloudState = data?.state ? normalizeState(data.state) : null
+      let legacyState: AppState | null = null
+      const legacyRaw = localStorage.getItem('pesapilot-data-v1.1') || localStorage.getItem('pesapilot-data-v1.2')
+      if (legacyRaw) {
+        try { legacyState = normalizeState(JSON.parse(legacyRaw)) } catch { legacyState = null }
       }
-      nextState = nextState ?? cachedState ?? initialState
+
+      // Important migration/safety rule: an existing but completely empty cloud row
+      // must not erase meaningful finance data already cached on this device.
+      const localCandidate = hasMeaningfulFinance(cachedState) ? cachedState : hasMeaningfulFinance(legacyState) ? legacyState : null
+      const shouldPromoteLocal = Boolean(localCandidate && !hasMeaningfulFinance(cloudState))
+      const nextState = shouldPromoteLocal ? localCandidate! : cloudState ?? cachedState ?? legacyState ?? initialState
 
       setState(nextState)
       localStorage.setItem(localKey, JSON.stringify(nextState))
@@ -86,8 +94,12 @@ export function useCloudFinance(userId: string | undefined) {
       setReady(true)
       setSyncStatus('synced')
 
-      if (!data) {
-        await supabase.from('pesapilot_finance_states').upsert({ user_id: userId, state: nextState, updated_at: new Date().toISOString() })
+      if (!data || shouldPromoteLocal) {
+        const { error: promoteError } = await supabase.rpc('moneycove_save_finance_state', { p_state: nextState })
+        if (promoteError) {
+          console.error('MoneyCove cloud migration save failed', promoteError)
+          setSyncStatus('error')
+        }
       }
     })()
 
@@ -108,9 +120,7 @@ export function useCloudFinance(userId: string | undefined) {
         setSyncStatus('offline')
         return
       }
-      const { error } = await supabase!
-        .from('pesapilot_finance_states')
-        .upsert({ user_id: userId, state, updated_at: new Date().toISOString() })
+      const { error } = await supabase!.rpc('moneycove_save_finance_state', { p_state: state })
       if (error) {
         console.error('MoneyCove cloud save failed', error)
         setSyncStatus('error')
