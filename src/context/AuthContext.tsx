@@ -10,6 +10,7 @@ type AuthContextValue = {
   displayName: string
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
+  updateDisplayName: (name: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -119,6 +120,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) return
       const { data } = await supabase.auth.getUser()
       if (data.user && session) setSession({ ...session, user: data.user })
+    },
+    updateDisplayName: async (name: string) => {
+      if (!supabase || !session?.user) throw new Error('Your account session is not available.')
+      const nextName = name.trim().replace(/\s+/g, ' ').slice(0, 80)
+      if (nextName.length < 2) throw new Error('Display name must be at least 2 characters.')
+      const { data, error } = await supabase.auth.updateUser({ data: { ...session.user.user_metadata, full_name: nextName, name: nextName } })
+      if (error) throw error
+      const { error: profileError } = await supabase.from('pesapilot_profiles').upsert({
+        user_id: session.user.id,
+        full_name: nextName,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+      if (profileError) throw profileError
+      if (data.user) setSession({ ...session, user: data.user })
     },
   }), [session, loading])
 

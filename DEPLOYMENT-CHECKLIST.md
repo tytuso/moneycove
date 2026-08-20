@@ -1,4 +1,4 @@
-# MoneyCove v2.5.3 Launch Checklist
+# MoneyCove v2.5.4 Launch Checklist
 
 Follow this only when moving the commercial build to production. Nile Core database tables and the MoneyCove signup/founder Edge Functions have already been created during development.
 

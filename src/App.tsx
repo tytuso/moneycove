@@ -23,10 +23,11 @@ import { useSubscription } from './hooks/useSubscription'
 import { useFounderAccess } from './hooks/useFounderAccess'
 import { useAuth } from './context/AuthContext'
 import { exportTransactionsCsv } from './utils/csv'
+import { exportTransactionsPdf } from './utils/pdf'
 import type { Transaction } from './types'
 
 export default function App() {
-  const { user, loading: authLoading, displayName, signOut } = useAuth()
+  const { user, loading: authLoading, displayName, signOut, updateDisplayName } = useAuth()
   const { state, setState, ready, syncStatus } = useCloudFinance(user?.id)
   const { plan, isPro, refresh: refreshPlan } = useSubscription(user?.id)
   const { isFounder } = useFounderAccess(user?.id, user?.email)
@@ -107,7 +108,7 @@ export default function App() {
   } else if (page==='founder' && isFounder) {
     content = <FounderPage/>
   } else if (page==='settings') {
-    content = <SettingsPage settings={state.settings} userName={userName} userEmail={userEmail} plan={plan} syncStatus={syncStatus} setSettings={settings=>setState(current=>({...current,settings}))} onExport={()=>{exportTransactionsCsv(state.transactions);notify('CSV export downloaded')}} onReset={()=>setConfirm({kind:'reset'})} onLogout={()=>void logout()} onBilling={upgrade}/>
+    content = <SettingsPage settings={state.settings} userName={userName} userEmail={userEmail} plan={plan} syncStatus={syncStatus} setSettings={settings=>setState(current=>({...current,settings}))} onExportCsv={()=>{exportTransactionsCsv(state.transactions);notify('CSV export downloaded')}} onExportPdf={()=>{if(!isPro){upgrade();notify('Premium PDF statements are included with MoneyCove Pro');return}exportTransactionsPdf({ transactions: state.transactions, currency: state.settings.currency, userName });notify('Premium PDF statement downloaded')}} onUpdateDisplayName={async name=>{await updateDisplayName(name);notify('Display name updated')}} onReset={()=>setConfirm({kind:'reset'})} onLogout={()=>void logout()} onBilling={upgrade}/>
   } else {
     content = <Dashboard transactions={state.transactions} month={month} setMonth={setMonth} budget={state.monthlyBudget} currency={state.settings.currency} userName={userName} onAdd={openAdd} onViewAll={()=>setPage('transactions')}/>
   }

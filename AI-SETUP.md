@@ -1,4 +1,4 @@
-# MoneyCove AI Adviser — v2.5.3
+# MoneyCove AI Adviser — v2.5.4
 
 MoneyCove AI now runs through the Supabase Edge Function:
 

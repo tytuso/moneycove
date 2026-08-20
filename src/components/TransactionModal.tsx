@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { categoryIcons, expenseCategories, incomeCategories } from '../data/categories'
 import type { CurrencyCode, Transaction, TransactionType } from '../types'
@@ -13,6 +13,7 @@ export function TransactionModal({ open, currency, transaction, initialDate, onC
   const [date, setDate] = useState(today())
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
+  const dialogRef = useRef<HTMLFormElement | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -29,6 +30,7 @@ export function TransactionModal({ open, currency, transaction, initialDate, onC
     if (!open) return
     const scrollY = window.scrollY
     const body = document.body
+    const root = document.documentElement
     const previous = { position: body.style.position, top: body.style.top, left: body.style.left, right: body.style.right, width: body.style.width, overflow: body.style.overflow }
     body.style.position = 'fixed'
     body.style.top = `-${scrollY}px`
@@ -36,7 +38,23 @@ export function TransactionModal({ open, currency, transaction, initialDate, onC
     body.style.right = '0'
     body.style.width = '100%'
     body.style.overflow = 'hidden'
+
+    const viewport = window.visualViewport
+    const syncViewportHeight = () => {
+      const height = viewport?.height || window.innerHeight
+      root.style.setProperty('--moneycove-visual-height', `${Math.round(height)}px`)
+    }
+    syncViewportHeight()
+    viewport?.addEventListener('resize', syncViewportHeight)
+    viewport?.addEventListener('scroll', syncViewportHeight)
+    window.addEventListener('orientationchange', syncViewportHeight)
+    window.requestAnimationFrame(() => dialogRef.current?.scrollTo({ top: 0, behavior: 'auto' }))
+
     return () => {
+      viewport?.removeEventListener('resize', syncViewportHeight)
+      viewport?.removeEventListener('scroll', syncViewportHeight)
+      window.removeEventListener('orientationchange', syncViewportHeight)
+      root.style.removeProperty('--moneycove-visual-height')
       body.style.position = previous.position
       body.style.top = previous.top
       body.style.left = previous.left
@@ -59,7 +77,7 @@ export function TransactionModal({ open, currency, transaction, initialDate, onC
     onSave({ id: transaction?.id ?? crypto.randomUUID(), type, amount: numeric, description: description.trim(), category: category as Transaction['category'], date, note: note.trim() || undefined })
   }
 
-  return <div className="modal-backdrop ios-modal-backdrop" role="presentation"><form onSubmit={submit} className="dialog-card ios-dialog-card max-w-2xl overflow-y-auto">
+  return <div className="modal-backdrop ios-modal-backdrop" role="presentation"><form ref={dialogRef} onSubmit={submit} className="dialog-card ios-dialog-card max-w-2xl overflow-y-auto">
     <div className="sticky top-0 z-10 -mx-6 -mt-6 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"><div><h2 className="text-xl font-black text-slate-900 dark:text-white">{transaction ? 'Edit transaction' : 'Add transaction'}</h2><p className="mt-1 text-xs font-semibold text-slate-400">Keep your money picture up to date.</p></div><button type="button" onClick={onClose} className="icon-btn"><X size={18}/></button></div>
     <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800"><button type="button" className={`seg-btn ${type === 'expense' ? 'seg-btn-active' : ''}`} onClick={() => setType('expense')}>Expense</button><button type="button" className={`seg-btn ${type === 'income' ? 'seg-btn-active' : ''}`} onClick={() => setType('income')}>Income</button></div>
     <div className="mt-5"><label className="field-label">Amount</label><div className="amount-input-wrap"><span>{currency}</span><input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g,''))} placeholder="0" aria-label="Amount"/></div><p className="mt-1.5 text-right text-xs font-bold text-slate-400">{currency} {displayAmount}</p></div>

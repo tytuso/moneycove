@@ -1,4 +1,4 @@
-# MoneyCove v2.5.3 verification
+# MoneyCove v2.5.4 verification
 
 - Package version: 2.5.1
 - Visible version labels are driven by `src/version.ts` to avoid stale hard-coded version text.
