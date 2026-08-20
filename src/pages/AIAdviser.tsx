@@ -31,15 +31,23 @@ type ApiPayload = {
   error?: string
 }
 
-async function invokeAi(body: Record<string, unknown>) {
+async function invokeAi(body: Record<string, unknown>, allowRetry = true) {
   if (!supabase) throw new Error('MoneyCove cloud services are not configured.')
   const { data, error } = await supabase.functions.invoke('moneycove-ai-adviser', { body })
   if (error) {
     let message = 'AI Adviser could not respond.'
+    let status = 0
     try {
-      const context = await error.context?.json?.()
+      status = Number(error.context?.status || 0)
+      const context = await error.context?.clone?.().json?.() ?? await error.context?.json?.()
       if (context?.error) message = context.error
     } catch {}
+
+    const authFailure = status === 401 || /session.*(invalid|expired)|invalid.*session|jwt/i.test(message)
+    if (allowRetry && authFailure) {
+      const refreshed = await supabase.auth.refreshSession()
+      if (!refreshed.error && refreshed.data.session) return invokeAi(body, false)
+    }
     throw new Error(message)
   }
   const payload = (data || {}) as ApiPayload

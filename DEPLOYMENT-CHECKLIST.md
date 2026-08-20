@@ -1,4 +1,4 @@
-# MoneyCove v2.5.1 Launch Checklist
+# MoneyCove v2.5.3 Launch Checklist
 
 Follow this only when moving the commercial build to production. Nile Core database tables and the MoneyCove signup/founder Edge Functions have already been created during development.
 
@@ -52,7 +52,7 @@ AI Adviser server variables:
 
 ```text
 OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-5-mini
+OPENAI_MODEL=gpt-5.6-luna
 ```
 
 Optional Vercel server APIs/welcome-email helpers may also use:

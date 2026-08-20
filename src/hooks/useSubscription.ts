@@ -26,7 +26,9 @@ export function useSubscription(userId: string | undefined) {
       .maybeSingle()
 
     if (error) {
-      setPlan({ tier: 'free', status: 'free', currentPeriodEnd: null, loading: false })
+      // A suspended mobile PWA can briefly resume with a stale access token. Do not
+      // downgrade an already-known Pro user because of one transient auth request.
+      setPlan(current => current.loading ? { ...freePlan, loading: false } : { ...current, loading: false })
       return
     }
 
@@ -63,6 +65,30 @@ export function useSubscription(userId: string | undefined) {
   }, [userId])
 
   useEffect(() => { void refresh() }, [refresh])
+
+  useEffect(() => {
+    if (!userId || !supabase) return
+    const client = supabase
+    const scheduleRefresh = () => { window.setTimeout(() => { void refresh() }, 0) }
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleRefresh() }
+    const onFocus = () => scheduleRefresh()
+    const onPageShow = () => scheduleRefresh()
+    const onOnline = () => scheduleRefresh()
+    const { data: authSubscription } = client.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') scheduleRefresh()
+    })
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onFocus)
+    window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('online', onOnline)
+    return () => {
+      authSubscription.subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onFocus)
+      window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('online', onOnline)
+    }
+  }, [userId, refresh])
 
   return { plan, isPro: plan.tier === 'pro', refresh }
 }

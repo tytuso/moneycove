@@ -1,4 +1,4 @@
-# MoneyCove AI Adviser — v2.5.1
+# MoneyCove AI Adviser — v2.5.3
 
 MoneyCove AI now runs through the Supabase Edge Function:
 
@@ -8,7 +8,7 @@ The OpenAI key is never sent to the browser.
 
 ## Model
 
-Default: `gpt-5-mini`
+Default: `gpt-5.6-luna`
 
 The model can be overridden with the Supabase secret `OPENAI_MODEL`.
 
@@ -35,6 +35,6 @@ Add this in Supabase Edge Function secrets:
 
 Optional:
 
-`OPENAI_MODEL=gpt-5-mini`
+`OPENAI_MODEL=gpt-5.6-luna`
 
 Do not put the OpenAI secret in any `VITE_*` environment variable and do not commit it to GitHub.

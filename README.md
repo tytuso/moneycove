@@ -1,4 +1,4 @@
-# MoneyCove v2.5.1 — Commercial Edition
+# MoneyCove v2.5.3 — Commercial Edition
 
 MoneyCove is a modern personal expense tracker, budget planner and financial calendar built with React, TypeScript, Vite, Tailwind CSS and Supabase.
 
@@ -96,4 +96,4 @@ See `DEPLOYMENT-CHECKLIST.md` for the current launch steps.
 
 ## AI Adviser backend
 
-MoneyCove v2.5.1 uses the Supabase Edge Function `moneycove-ai-adviser`. Add `OPENAI_API_KEY` as a Supabase Edge Function secret before launch. The browser never receives the API key.
+MoneyCove v2.5.3 uses the Supabase Edge Function `moneycove-ai-adviser`. Add `OPENAI_API_KEY` as a Supabase Edge Function secret before launch. The browser never receives the API key.

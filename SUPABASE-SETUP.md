@@ -1,4 +1,4 @@
-# MoneyCove v2.5.1 — Supabase Backend
+# MoneyCove v2.5.3 — Supabase Backend
 
 MoneyCove uses the shared **Nile Core** Supabase project using the existing legacy `pesapilot_*` table names. Those internal names are intentionally retained so current accounts and finance data continue to work through the public MoneyCove rebrand.
 

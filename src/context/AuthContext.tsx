@@ -62,9 +62,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
+    let checking = false
+    const revalidateSession = async () => {
+      if (checking || document.visibilityState === 'hidden') return
+      checking = true
+      try {
+        const { data: current } = await client.auth.getSession()
+        if (!current.session) {
+          setSession(null)
+          return
+        }
+
+        const { error: userError } = await client.auth.getUser()
+        if (!userError) {
+          setSession(current.session)
+          return
+        }
+
+        const { data: refreshed, error: refreshError } = await client.auth.refreshSession()
+        if (!refreshError && refreshed.session) setSession(refreshed.session)
+      } finally {
+        checking = false
+      }
+    }
+
+    const onVisible = () => { if (document.visibilityState === 'visible') void revalidateSession() }
+    const onFocus = () => { void revalidateSession() }
+    const onPageShow = () => { void revalidateSession() }
+    const onOnline = () => { void revalidateSession() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onFocus)
+    window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('online', onOnline)
+
     return () => {
       alive = false
       subscription.subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onFocus)
+      window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('online', onOnline)
     }
   }, [])
 
