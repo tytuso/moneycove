@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const FOUNDER_EMAILS = new Set(["opiotitus333@gmail.com", "opiotituss333@gmail.com", "oyagoisaac7@gmail.com"]);
+const FOUNDER_EMAILS = new Set(["opiotitus333@gmail.com", "oyagoisaac7@gmail.com"]);
 const allowedOrigins = new Set([
   "http://localhost:5173",
   "http://127.0.0.1:5173",

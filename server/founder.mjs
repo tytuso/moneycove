@@ -1,7 +1,7 @@
 import { requireApiUser } from './supabaseAdmin.mjs'
 
 function founderEmails() {
-  return [...['opiotitus333@gmail.com', 'opiotituss333@gmail.com', 'oyagoisaac7@gmail.com'], ...String(process.env.MONEYCOVE_FOUNDER_EMAILS || process.env.MONYRA_FOUNDER_EMAILS || process.env.PESAPILOT_FOUNDER_EMAILS || process.env.FOUNDER_EMAILS || 'opiotitus333@gmail.com')
+  return [...['opiotitus333@gmail.com', 'oyagoisaac7@gmail.com'], ...String(process.env.MONEYCOVE_FOUNDER_EMAILS || process.env.MONYRA_FOUNDER_EMAILS || process.env.PESAPILOT_FOUNDER_EMAILS || process.env.FOUNDER_EMAILS || 'opiotitus333@gmail.com')
     .split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean)]
