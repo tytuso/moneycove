@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const FOUNDER_EMAIL = 'opiotitus333@gmail.com'
+const FOUNDER_EMAILS = new Set(['opiotitus333@gmail.com', 'opiotituss333@gmail.com', 'oyagoisaac7@gmail.com'])
 const FOUNDER_FUNCTION = 'https://dpmajonvvhopjnupgfpq.supabase.co/functions/v1/pesapilot-founder'
 
 export function useFounderAccess(userId: string | undefined, email?: string | null) {
   const normalized = String(email || '').trim().toLowerCase()
-  const eligible = Boolean(userId) && normalized === FOUNDER_EMAIL
+  const eligible = Boolean(userId) && FOUNDER_EMAILS.has(normalized)
   const [isFounder, setIsFounder] = useState(false)
   const [loading, setLoading] = useState(eligible)
 

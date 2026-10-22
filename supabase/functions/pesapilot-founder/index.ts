@@ -1,11 +1,14 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const FOUNDER_EMAIL = "opiotitus333@gmail.com";
+const FOUNDER_EMAILS = new Set(["opiotitus333@gmail.com", "opiotituss333@gmail.com", "oyagoisaac7@gmail.com"]);
 const allowedOrigins = new Set([
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://moneycove.nileai.solutions",
+  "https://moneycove.vercel.app",
+  "https://moneycove-titus-projects-4a3cc808.vercel.app",
+  "https://moneycove-git-main-titus-projects-4a3cc808.vercel.app",
   "https://pesapilot.nileai.solutions",
   "https://pesapilot.titussimplifies.com",
 ]);
@@ -25,7 +28,7 @@ function json(body: unknown, status: number, origin: string | null) {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors(origin) });
+  if (req.method === "OPTIONS") return new Response("ok", { status: 200, headers: cors(origin) });
   if (req.method !== "POST") return json({ error: "Method not allowed." }, 405, origin);
   if (origin && !allowedOrigins.has(origin)) return json({ error: "Origin not allowed." }, 403, origin);
 
@@ -36,7 +39,7 @@ Deno.serve(async (req: Request) => {
     const { data: userResult, error: userError } = await admin.auth.getUser(token);
     if (userError || !userResult.user) return json({ error: "Invalid session." }, 401, origin);
     const founder = userResult.user;
-    if (String(founder.email || "").trim().toLowerCase() !== FOUNDER_EMAIL) return json({ error: "Founder access required." }, 403, origin);
+    if (!founder.email_confirmed_at || !FOUNDER_EMAILS.has(String(founder.email || "").trim().toLowerCase())) return json({ error: "Founder access required." }, 403, origin);
 
     let payload: Record<string, unknown> = {};
     try { payload = JSON.parse(await req.text() || "{}"); } catch { return json({ error: "Invalid request." }, 400, origin); }
